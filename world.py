@@ -97,57 +97,13 @@ class World():
         render_text_middle("エンターキーを押してスタート", (self.SCREEN_SIZE[0]//2, self.SCREEN_SIZE[1]//2+20), 16, self.screen, self.font_color)
         
         self._get_event()
-        for event in self.current_events:
-            
-            if event.type == QUIT:
-                self.running = False
-            elif event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
-                    self.running = False
-                
-                elif event.key == K_RETURN:
-                    self.scene = "input_name_1"
-                    # self.next_turn_button.enable()
-                    print(self.scene)
-                    
-            elif event.type == pygame.USEREVENT:
-                print(event.Text)
+        self._handle_event(self.scene)
     
     def input_name(self, player: Player):
         
         render_text_middle(f"プレイヤー{player.id}の名前を入力", [480, 100], 24, self.screen, bold = False)
         self._get_event()
-        for event in self.current_events:
-            
-            if event.type == QUIT:
-                self.running = False
-            elif event.type == pygame.USEREVENT:
-                print(event.Text)
-                if 0 < len(event.Text):
-                    player.name = event.Text
-                    print(player)
-                    if self.player_1.name != "" and self.player_2.name != "":
-                        self.scene = "sentaku"
-                        self.end_choice_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((420, 80), (120, 40)),
-                                            text='End Choice',
-                                            manager=self.manager)
-                        self.next_turn_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((420, 120), (120, 40)),
-                                            text='Next Turn',
-                                            manager=self.manager)
-                        self.next_turn_button.disable()
-                        self.channel1.play(self.bgm_fight, loops = 1)
-                        
-                        
-                    elif self.player_2.name == "":
-                        self.scene = "input_name_2"
-                    elif self.player_1.name == "":
-                        self.scene = "input_name_1"
-            
-            elif event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
-                    self.running = False
-            
-            self.manager.process_events(event)
+        self._handle_event(self.scene, player)
             
         self.input_box_player_name.update(self.current_events)
         self.screen.blit(self.input_box_player_name.get_surface(), [480, 130])
@@ -159,41 +115,7 @@ class World():
         self.screen.blit(self.img2, [600, 320])
         
         self._get_event()
-        for event in self.current_events:
-            if event.type == QUIT:
-                self.running = False
-            elif event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
-                    self.scene = "start"
-                
-                elif event.key == K_RETURN:
-                    self.scene = "sentaku"
-                    print(self.scene)
-                    
-                elif event.key == K_q:
-                    self.player_1.waza = 0
-                elif event.key == K_w:
-                    self.player_1.waza = 1
-                elif event.key == K_e:
-                    self.player_1.waza = 2
-                elif event.key == K_i:
-                    self.player_2.waza = 0
-                elif event.key == K_o:
-                    self.player_2.waza = 1
-                elif event.key == K_p:
-                    self.player_2.waza = 2
-                    
-            elif event.type == pygame_gui.UI_BUTTON_PRESSED:
-                if event.ui_element == self.end_choice_button:
-                    if self.player_1.waza != None and self.player_2.waza != None:
-                        self.scene = "kekka"
-                        self.n = 0
-                        self.end_choice_button.disable()
-                        self.next_turn_button.enable()
-                        self.responses = ["", ""]
-                        print(self.scene)
-                    
-            self.manager.process_events(event)
+        self._handle_event(self.scene)
     
     def kekka(self, ai_mode: bool = False):
         
@@ -238,28 +160,7 @@ class World():
             self.scene = "katimake"
         
         self._get_event()
-        for event in self.current_events:
-            if event.type == QUIT:
-                self.running = False
-            elif event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
-                    self.scene = "start"
-                
-                elif event.key == K_RETURN:
-                    # self.scene = "sentaku"
-                    print(self.scene)
-                    
-            elif event.type == pygame_gui.UI_BUTTON_PRESSED:
-                if event.ui_element == self.next_turn_button:
-                    self.scene = "sentaku"
-                    self.player_2.waza = None
-                    self.player_1.waza = None
-                    
-                    self.end_choice_button.enable()
-                    self.next_turn_button.disable()
-                    print(self.scene)
-                    
-            self.manager.process_events(event)
+        self._handle_event(self.scene)
             
         self.n += 1
     
@@ -270,30 +171,7 @@ class World():
         self._render_status(self.scene)
         
         self._get_event()
-        
-        for event in self.current_events:
-            if event.type == QUIT:
-                self.running = False
-            elif event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
-                    self.scene = "start"
-                    self.__init__()
-                
-                elif event.key == K_RETURN:
-                    # self.scene = "sentaku"
-                    print(self.scene)
-                    
-            elif event.type == pygame_gui.UI_BUTTON_PRESSED:
-                if event.ui_element == self.next_turn_button:
-                    self.scene = "sentaku"
-                    self.player_2.waza = None
-                    self.player_1.waza = None
-                    
-                    self.end_choice_button.enable()
-                    self.next_turn_button.disable()
-                    print(self.scene)
-                    
-            self.manager.process_events(event)
+        self._handle_event(self.scene)
         
     def _get_event(self):
         if len(self.current_events) > 0:
@@ -371,7 +249,95 @@ class World():
                 self.screen.blit(self.img_loser_mark, [600, 320])
             
             render_text_middle("Escキーでスタート画面に戻る", [480, 360], 20, self.screen, bold=True)
+    
+    def _handle_event(self, scene_name: str = None, player_on_focus: Player = None):
+        """### 各フレームで１回だけ呼ばれイベントを処理する。
         
+        Args:
+            scene_name (str, optional): イベントを処理する現在のシーンを指定します。シーンごとに使用するキーや想定されたイベントが異なっているため正しいシーン名を与えてください。None の場合は、self.scene に置換されます。 Defaults to None.
+            player_on_focus (Player, optional): イベントを処理させる対象を特定のプレイヤーのみに限定したいときに与えてください。例: プレイヤー1の名前を入力するシーンなど。 Defaults to None.
+        """
+        
+        for event in self.current_events:
+            if event.type == pygame.QUIT:
+                self.running = False
+                pygame.quit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == K_ESCAPE:
+                    if scene_name == "start":
+                        self.running = False
+                        pygame.quit()
+                    elif scene_name == "katimake":
+                        self.__init__()
+                        self.scene = "start"
+                    else:
+                        self.scene = "start"
+                        
+                elif event.key == K_RETURN:
+                    if scene_name == "start":
+                        self.scene = "input_name_1"
+                        
+                elif event.key == K_q:
+                    if scene_name == "sentaku":
+                        self.player_1.waza = 0
+                elif event.key == K_w:
+                    if scene_name == "sentaku":
+                        self.player_1.waza = 1
+                elif event.key == K_e:
+                    if scene_name == "sentaku":
+                        self.player_1.waza = 2
+                elif event.key == K_i:
+                    if scene_name == "sentaku":
+                        self.player_2.waza = 0
+                elif event.key == K_o:
+                    if scene_name == "sentaku":
+                        self.player_2.waza = 1
+                elif event.key == K_p:
+                    if scene_name == "sentaku":
+                        self.player_2.waza = 2
+                
+            elif event.type == pygame.USEREVENT:
+                if scene_name.__contains__("input_name"):
+                    print(event.Text)
+                    if 0 < len(event.Text):
+                        player_on_focus.name = event.Text
+                        print(player_on_focus)
+                        if self.player_1.name != "" and self.player_2.name != "":
+                            self.scene = "sentaku"
+                            self.end_choice_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((420, 80), (120, 40)),
+                                                text='End Choice',
+                                                manager=self.manager)
+                            self.next_turn_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((420, 120), (120, 40)),
+                                                text='Next Turn',
+                                                manager=self.manager)
+                            self.next_turn_button.disable()
+                            self.channel1.play(self.bgm_fight, loops = 1)
+                            
+                        elif self.player_2.name == "":
+                            self.scene = "input_name_2"
+                        elif self.player_1.name == "":
+                            self.scene = "input_name_1"
+                        
+            elif event.type == pygame_gui.UI_BUTTON_PRESSED:
+                if event.ui_element == self.end_choice_button:
+                    if self.player_1.waza != None and self.player_2.waza != None:
+                        self.scene = "kekka"
+                        self.n = 0
+                        self.end_choice_button.disable()
+                        self.next_turn_button.enable()
+                        self.responses = ["", ""]
+                        print(self.scene)
+                
+                if event.ui_element == self.next_turn_button:
+                    self.scene = "sentaku"
+                    self.player_2.waza = None
+                    self.player_1.waza = None
+                    
+                    self.end_choice_button.enable()
+                    self.next_turn_button.disable()
+                    print(self.scene)
+            
+            self.manager.process_events(event)
     
     def _render_waza(self, player_id: int, pos: list):
         waza_list = waza_loader(player_id)
