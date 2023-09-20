@@ -168,3 +168,5 @@ img
 img/
 sound
 sound/
+secret*
+secret*/

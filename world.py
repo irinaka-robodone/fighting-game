@@ -1,10 +1,14 @@
+import os
+import random
+from dataclasses import dataclass
+
 import pygame
 from pygame.locals import *
 import pandas as pd
 import pygame_gui
-from dataclasses import dataclass
-import os
-import random
+from pygame_textinput.textinput import TextInput
+
+from ai import ai_response, template
 
 base_dir = os.environ.get("BASE_DIR")
 
@@ -18,8 +22,11 @@ def render_text(text: str, pos: tuple[int, int], size: int, screen: pygame.Surfa
 class Player:
     hp: float
     id: int
+    name: str = ""
     waza: int = None
-    damage: int = None
+    waza_desc: str = None
+    damage_get: int = None
+    waza_seikou: str = ""
 
 class World():
     def __init__(self) -> None:
@@ -36,8 +43,8 @@ class World():
         self.current_events = []
         self.prev_events = []
         
-        self.player_1 = Player(100, 1)
-        self.player_2 = Player(100, 2)
+        self.player_1 = Player(100, 1, name="")
+        self.player_2 = Player(100, 2, name="")
         
         self.bg_color = (230,230,230)
         self.font_color = (20,20,20)
@@ -52,13 +59,6 @@ class World():
         self.img_make_mark.set_colorkey((255,255,255))
         
         self.manager = pygame_gui.UIManager((self.SCREEN_SIZE[0], self.SCREEN_SIZE[1]))
-        self.end_choice_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((420, 80), (120, 40)),
-                                            text='End Choice',
-                                            manager=self.manager)
-        self.next_turn_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((420, 120), (120, 40)),
-                                            text='Next Turn',
-                                            manager=self.manager)
-        self.next_turn_button.disable()
         
         self.background = pygame.Surface(self.SCREEN_SIZE)
         self.background.fill(self.bg_color)
@@ -73,6 +73,10 @@ class World():
         self.sound_title_call = pygame.mixer.Sound(f"{base_dir}/asset/sound/title_call.mp3")
         
         self.channel2.play(self.sound_title_call, loops=0)
+        
+        self.text_box_player_1 = TextInput(pygame.font.SysFont("yumincho", 30), self.font_color)
+        self.text_box_player_2 = TextInput(pygame.font.SysFont("yumincho", 30), self.font_color)
+        
     
     def process(self): # ゲームの状態に応じて実行する関数を分ける
         self.time_delta = self.clock.tick(self.FPS)/1000.0
@@ -85,6 +89,10 @@ class World():
             self.show_start_screen()
         elif self.scene == "katimake":
             self.katimake()
+        elif self.scene == "namae_gime_1":
+            self.namae_gime(self.player_1)
+        elif self.scene == "namae_gime_2":
+            self.namae_gime(self.player_2)
         self.update_screen()
             
     def update_screen(self):
@@ -97,10 +105,13 @@ class World():
         self.manager.draw_ui(self.screen)
         
     def sentaku(self):
-        render_text(f"プレイヤー{self.player_1.id}", [200,30], 20, self.screen)
+        if self.channel1.get_busy() == False:
+            self.channel1.play(self.bgm_fight, loops = 1)
+            
+        render_text(f"{self.player_1.name}", [200,30], 20, self.screen)
         render_text(f"HP: {self.player_1.hp}", [200,60], 20, self.screen)
         
-        render_text(f"プレイヤー{self.player_2.id}", [740,30], 20, self.screen)
+        render_text(f"{self.player_2.name}", [740,30], 20, self.screen)
         render_text(f"HP: {self.player_2.hp}", [740,60], 20, self.screen)
         
         render_text("VS", [480, 30], 24, self.screen)
@@ -108,8 +119,8 @@ class World():
         self._render_waza(self.player_1.id, pos=[100, 100])
         self._render_waza(self.player_2.id, pos=[640, 100])
         
-        self.screen.blit(self.img1, [60, 240])
-        self.screen.blit(self.img2, [600, 240])
+        self.screen.blit(self.img1, [60, 300])
+        self.screen.blit(self.img2, [600, 300])
         
         self._get_event()
         for event in self.current_events:
@@ -143,40 +154,70 @@ class World():
                         self.n = 0
                         self.end_choice_button.disable()
                         self.next_turn_button.enable()
+                        self.responses = ["", ""]
                         print(self.scene)
                     
             self.manager.process_events(event)
     
     def kekka(self):
-        render_text(f"プレイヤー{self.player_1.id}", [200,30], 20, self.screen)
+        
+        render_text(f"{self.player_1.name}", [200,30], 20, self.screen)
         render_text(f"HP: {self.player_1.hp}", [200,60], 20, self.screen)
         
-        render_text(f"プレイヤー{self.player_2.id}", [740,30], 20, self.screen)
+        render_text(f"{self.player_2.name}", [740,30], 20, self.screen)
         render_text(f"HP: {self.player_2.hp}", [740,60], 20, self.screen)
         
         render_text("VS", [480, 30], 24, self.screen)
         
         if self.n < 1:
             if random.random() <= waza_loader(self.player_1.id)[self.player_1.waza]["kakuritu"]/100.0:
-                self.player_2.damage = waza_loader(self.player_1.id)[self.player_1.waza]["damage"]
+                self.player_2.damage_get = waza_loader(self.player_1.id)[self.player_1.waza]["damage"]
+                self.player_1.waza_desc = waza_loader(self.player_1.id)[self.player_1.waza]["desc"]
+                self.player_1.waza_seikou = "成功"
             else:
-                self.player_2.damage = 0
-            if random.random() <= waza_loader(self.player_2.id)[self.player_2.waza]["kakuritu"]/100.0:
-                self.player_1.damage = waza_loader(self.player_2.id)[self.player_2.waza]["damage"]
-            else:
-                self.player_1.damage = 0
-            
-            self.player_1.hp -= self.player_1.damage
-            self.player_2.hp -= self.player_2.damage
+                self.player_2.damage_get = 0
+                self.player_1.waza_desc = waza_loader(self.player_1.id)[self.player_1.waza]["desc"]
+                self.player_1.waza_seikou = "失敗"
 
-        render_text(f"プレイヤー{self.player_1.id}は{self.player_1.damage}のダメージをうけた！", [480, 200], 18, self.screen)
-        render_text(f"プレイヤー{self.player_2.id}は{self.player_2.damage}のダメージをうけた！", [480, 230], 18, self.screen)
+            if random.random() <= waza_loader(self.player_2.id)[self.player_2.waza]["kakuritu"]/100.0:
+                self.player_1.damage_get = waza_loader(self.player_2.id)[self.player_2.waza]["damage"]
+                self.player_2.waza_desc = waza_loader(self.player_2.id)[self.player_2.waza]["desc"]
+                self.player_2.waza_seikou = "成功"
+            else:
+                self.player_1.damage_get = 0
+                self.player_2.waza_desc = waza_loader(self.player_2.id)[self.player_2.waza]["desc"]
+                self.player_2.waza_seikou = "失敗"
+                
+            data = [["Status Name", "Description"], 
+                    ["player_1_id", f"{self.player_1.id}"], 
+                    ["player_2_id", f"{self.player_2.id}"], 
+                    ["プレイヤー1_名前", f"{self.player_1.name}"], 
+                    ["プレイヤー2_名前", f"{self.player_2.name}"], 
+                    ["技を受ける前のプレイヤー1のHP", f"{self.player_1.hp}"], 
+                    ["技を受ける前のプレイヤー2のHP", f"{self.player_2.hp}"], 
+                    ["プレイヤー1の出した技", f"{self.player_1.waza_desc}"], 
+                    ["プレイヤー2の出した技", f"{self.player_2.waza_desc}"], 
+                    ["プレイヤー1の出した技の結果", self.player_1.waza_seikou], 
+                    ["プレイヤー2の出した技の結果", self.player_2.waza_seikou]]
+            
+            df = pd.DataFrame(data[1:], index=None, columns=data[0])
+            self.responses = ai_response.get_script(df, max_retries=5)
+            
+            
+            self.player_1.hp -= self.player_1.damage_get
+            self.player_2.hp -= self.player_2.damage_get
+            
+        render_text(f"{self.player_1.name}: {self.responses[0]}", [480, 200], 16, self.screen, bold=False)
+        render_text(f"{self.player_2.name}: {self.responses[1]}", [480, 224], 16, self.screen, bold=False)
+        
+        render_text(f"{self.player_1.name}は{self.player_1.damage_get}のダメージをうけた！", [480, 270], 16, self.screen)
+        render_text(f"{self.player_2.name}は{self.player_2.damage_get}のダメージをうけた！", [480, 300], 16, self.screen)
 
         self._render_waza(self.player_1.id, pos=[100, 100])
         self._render_waza(self.player_2.id, pos=[640, 100])
         
-        self.screen.blit(self.img1, [60, 240])
-        self.screen.blit(self.img2, [600, 240])
+        self.screen.blit(self.img1, [60, 320])
+        self.screen.blit(self.img2, [600, 320])
         
         # self.end_choice_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((430, 100), (100, 40)),
         #                                     text='Next Turn',
@@ -213,24 +254,22 @@ class World():
 
     
     def katimake(self):
-        render_text(f"プレイヤー{self.player_1.id}", [200,30], 20, self.screen)
+        render_text(f"{self.player_1.name}", [200,30], 20, self.screen)
         render_text(f"HP: {self.player_1.hp}", [200,60], 20, self.screen)
         
-        render_text(f"プレイヤー{self.player_2.id}", [740,30], 20, self.screen)
+        render_text(f"{self.player_2.name}", [740,30], 20, self.screen)
         render_text(f"HP: {self.player_2.hp}", [740,60], 20, self.screen)
         
         # render_text("VS", [480, 30], 24, self.screen)
 
-        render_text(f"プレイヤー{self.player_1.id}は{self.player_1.damage}のダメージをうけた！", [480, 200], 18, self.screen)
-        render_text(f"プレイヤー{self.player_2.id}は{self.player_2.damage}のダメージをうけた！", [480, 230], 18, self.screen)
-
-        
+        render_text(f"{self.player_1.name}は{self.player_1.damage_get}のダメージをうけた！", [480, 200], 18, self.screen)
+        render_text(f"{self.player_2.name}は{self.player_2.damage_get}のダメージをうけた！", [480, 230], 18, self.screen)
 
         self._render_waza(self.player_1.id, pos=[100, 100])
         self._render_waza(self.player_2.id, pos=[640, 100])
         
-        self.screen.blit(self.img1, [60, 240])
-        self.screen.blit(self.img2, [600, 240])
+        self.screen.blit(self.img1, [60, 300])
+        self.screen.blit(self.img2, [600, 300])
         
         self.next_turn_button.disable()
         self.end_choice_button.disable()
@@ -242,11 +281,11 @@ class World():
             self.screen.blit(self.img_make_mark, [600, 240])
             
         elif self.player_1.hp <= 0:
-            render_text(f'プレイヤー{self.player_2.id}の勝ち', [480, 300], 32, self.screen)
+            render_text(f'{self.player_2.name}の勝ち', [480, 300], 32, self.screen)
             self.screen.blit(self.img_make_mark, [60, 240])
 
         elif self.player_2.hp <= 0:
-            render_text(f'プレイヤー{self.player_1.id}の勝ち', [480, 300], 32, self.screen)
+            render_text(f'{self.player_1.name}の勝ち', [480, 300], 32, self.screen)
             self.screen.blit(self.img_make_mark, [600, 240])
         
         self._get_event()
@@ -280,7 +319,9 @@ class World():
         
         render_text("しょぼい格ゲー", (self.SCREEN_SIZE[0]//2, self.SCREEN_SIZE[1]//2-20), 32, self.screen, self.font_color)
         render_text("エンターキーを押してスタート", (self.SCREEN_SIZE[0]//2, self.SCREEN_SIZE[1]//2+20), 16, self.screen, self.font_color)
-        for event in pygame.event.get():
+        
+        self._get_event()
+        for event in self.current_events:
             
             if event.type == QUIT:
                 self.running = False
@@ -289,11 +330,63 @@ class World():
                     self.running = False
                 
                 elif event.key == K_RETURN:
-                    self.scene = "sentaku"
-                    self.channel1.play(self.bgm_fight, loops = 1)
+                    self.scene = "namae_gime_1"
                     # self.next_turn_button.enable()
-                    self.end_choice_button.enable()
                     print(self.scene)
+                    
+            elif event.type == pygame.USEREVENT:
+                print(event.Text)
+                    
+        # self.text_box_player_2.update(self.current_events)
+        # self.screen.blit(self.text_box_player_2.get_surface(), [600, 100])
+        
+    def namae_gime(self, player: Player):
+        
+        render_text(f"プレイヤー{player.id}の名前を入力", [480, 100], 24, self.screen, bold = False)
+        self._get_event()
+        for event in self.current_events:
+            
+            if event.type == QUIT:
+                self.running = False
+            elif event.type == pygame.USEREVENT:
+                print(event.Text)
+                if 0 < len(event.Text):
+                    player.name = event.Text
+                    print(player)
+                    if self.player_1.name != "" and self.player_2.name != "":
+                        self.scene = "sentaku"
+                        self.end_choice_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((420, 80), (120, 40)),
+                                            text='End Choice',
+                                            manager=self.manager)
+                        self.next_turn_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((420, 120), (120, 40)),
+                                            text='Next Turn',
+                                            manager=self.manager)
+                        self.next_turn_button.disable()
+                        self.channel1.play(self.bgm_fight, loops = 1)
+                        
+                        
+                    elif self.player_2.name == "":
+                        self.scene = "namae_gime_2"
+                    elif self.player_1.name == "":
+                        self.scene = "namae_gime_1"
+            
+            elif event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    self.running = False
+                
+                # elif event.key == K_RETURN:
+                #     self.scene = "namae_gime_2"
+                #     self.channel1.play(self.bgm_fight, loops = 1)
+                #     # self.next_turn_button.enable()
+                #     self.end_choice_button.enable()
+                #     print(self.scene)
+                    
+            self.manager.process_events(event)
+            
+        self.text_box_player_1.update(self.current_events)
+        self.screen.blit(self.text_box_player_1.get_surface(), [480, 130])
+        
+        
                     
     def _get_event(self):
         if len(self.current_events) > 0:
