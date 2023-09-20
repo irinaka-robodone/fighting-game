@@ -57,6 +57,9 @@ class World():
         
         self.bgm_fight = pygame.mixer.Sound(f"{base_dir}/asset/sound/maou_game_boss06.mp3")
         self.sound_title_call = pygame.mixer.Sound(f"{base_dir}/asset/sound/title_call.mp3")
+        self.es_attack_normal = pygame.mixer.Sound(f"{base_dir}/asset/sound/maou_se_battle14.mp3")
+        self.es_attack_heavy = pygame.mixer.Sound(f"{base_dir}/asset/sound/maou_se_battle06.mp3")
+        self.es_attack_missed = pygame.mixer.Sound(f"{base_dir}/asset/sound/maou_se_8bit26.mp3")
         
         self.channel2.play(self.sound_title_call, loops=0)
         
@@ -119,6 +122,7 @@ class World():
     
     def kekka(self, ai_mode: bool = False):
         
+        self.elapsed_time += self.time_delta
         self._render_status("kekka:before")
         
         """
@@ -150,9 +154,25 @@ class World():
                 self.responses = ai_response.get_script(df, max_retries=5)
             else:
                 pass
+            
+            if self.player_2.waza_seikou == "成功" and self.player_2.waza != 2:
+                self.channel2.play(self.es_attack_normal)
+            elif self.player_2.waza_seikou == "成功" and self.player_2.waza == 2:
+                self.channel2.play(self.es_attack_heavy)
+            else:
+                self.channel2.play(self.es_attack_missed)
         
         self._render_status("kekka", ai_mode)
         
+        if self.elapsed_time >= 1 and self._player_1_attack_was_displayed == False:
+            if self.player_1.waza_seikou == "成功" and self.player_1.waza != 2:
+                self.channel2.play(self.es_attack_normal)
+            elif self.player_1.waza_seikou == "成功" and self.player_1.waza == 2:
+                self.channel2.play(self.es_attack_heavy)
+            else:
+                self.channel2.play(self.es_attack_missed)
+            self._player_1_attack_was_displayed = True
+
         self.screen.blit(self.img1, [60, 320])
         self.screen.blit(self.img2, [600, 320])
         
@@ -220,10 +240,12 @@ class World():
             self._render_waza(self.player_2.id, pos=[640, 100])
             
         elif scene_name == "kekka":
-            render_text_middle(f"{self.player_1.name}は{self.player_1.damage_get}のダメージをうけた！", [480, 270], 16, self.screen)
-            render_text_middle(f"{self.player_2.name}は{self.player_2.damage_get}のダメージをうけた！", [480, 300], 16, self.screen)
+            if self.elapsed_time >= 0:
+                render_text_middle(f"{self.player_1.name}は{self.player_1.damage_get}のダメージをうけた！", [480, 270], 16, self.screen)
+            if self.elapsed_time >= 1:
+                render_text_middle(f"{self.player_2.name}は{self.player_2.damage_get}のダメージをうけた！", [480, 300], 16, self.screen)
             
-            if ai_mode == True:        
+            if ai_mode == True:
                 render_text_middle(f"{self.player_1.name}: {self.responses[0]}", [480, 200], 16, self.screen, bold=False)
                 render_text_middle(f"{self.player_2.name}: {self.responses[1]}", [480, 224], 16, self.screen, bold=False)
             else:
@@ -323,6 +345,8 @@ class World():
                     if self.player_1.waza != None and self.player_2.waza != None:
                         self.scene = "kekka"
                         self.n = 0
+                        self._player_1_attack_was_displayed = False
+                        self.elapsed_time = 0.0
                         self.end_choice_button.disable()
                         self.next_turn_button.enable()
                         self.responses = ["", ""]
@@ -330,6 +354,7 @@ class World():
                 
                 if event.ui_element == self.next_turn_button:
                     self.scene = "sentaku"
+                    self.elapsed_time = 0.0
                     self.player_2.waza = None
                     self.player_1.waza = None
                     
