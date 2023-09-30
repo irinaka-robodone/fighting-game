@@ -160,13 +160,13 @@ cython_debug/
 #.idea/
 
 
-asset
-asset/
+# asset
+# asset/
 .venv*
 .venv*/
-img
-img/
-sound
-sound/
-secret*
-secret*/
+# img
+# img/
+# sound
+# sound/
+# secret*
+# secret*/
