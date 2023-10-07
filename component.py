@@ -10,3 +10,5 @@ class Player:
     damage_get: int = None
     damage_give: int = None
     waza_seikou: str = ""
+    yuuri: str = None
+    waza_id = None
