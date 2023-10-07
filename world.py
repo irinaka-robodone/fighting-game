@@ -35,8 +35,8 @@ class World():
         self.bg_color = (230,230,230)
         self.font_color = (20,20,20)
         
-        self.img1 = pygame.image.load(f"{base_dir}/asset/img/sleepy_boy.png")
-        self.img2 = pygame.image.load(f"{base_dir}/asset/img/salary_person_male.png")
+        self.img1 = pygame.image.load(f"{base_dir}/asset/img/player1.png")
+        self.img2 = pygame.image.load(f"{base_dir}/asset/img/player2.jpg")
         self.img1 = pygame.transform.scale(self.img1, (300, 300))
         self.img2 = pygame.transform.scale(self.img2, (300, 300))
         
@@ -204,6 +204,10 @@ class World():
             threshold = waza["kakuritu"]/100.0
             players.waza_desc = waza["desc"]
             if random.random() < threshold:
+                if "-" in waza["damage"]:
+                    damage = waza ["dmage"]
+                    damage = random.randrange("-")
+                    players.damage_give = damage
                 players.damage_give = waza["damage"]
                 players.waza_seikou = "成功"
             else:
