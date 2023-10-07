@@ -23,7 +23,7 @@ class World():
         self.clock = pygame.time.Clock()
         pygame.init()
         self.ai_mode = ai_mode
-        self.screen = pygame.display.set_mode(self.SCREEN_SIZE)
+        self.screen = pygame.display.set_mode(self.SCREEN_SIZE, pygame.FULLSCREEN)
         pygame.display.set_caption(self.TITLE)
         
         self.current_events = []
@@ -35,8 +35,8 @@ class World():
         self.bg_color = (230,230,230)
         self.font_color = (20,20,20)
         
-        self.img1 = pygame.image.load(f"{base_dir}/asset/img/sleepy_boy.png")
-        self.img2 = pygame.image.load(f"{base_dir}/asset/img/salary_person_male.png")
+        self.img1 = pygame.image.load(f"{base_dir}/asset/img/sannin.jpg")
+        self.img2 = pygame.image.load(f"{base_dir}/asset/img/taiho.jpg")
         self.img1 = pygame.transform.scale(self.img1, (300, 300))
         self.img2 = pygame.transform.scale(self.img2, (300, 300))
         
@@ -55,8 +55,8 @@ class World():
         self.channel1.set_volume(0.2)
         self.channel2.set_volume(0.5)
         
-        self.bgm_fight = pygame.mixer.Sound(f"{base_dir}/asset/sound/maou_game_boss06.mp3")
-        self.sound_title_call = pygame.mixer.Sound(f"{base_dir}/asset/sound/maou_game_boss06.mp3")
+        self.bgm_fight = pygame.mixer.Sound(f"{base_dir}/asset/sound/maou_game_battle35.mp3")
+        self.sound_title_call = pygame.mixer.Sound(f"{base_dir}/asset/sound/maou_game_battle35.mp3")
         self.es_attack_normal = pygame.mixer.Sound(f"{base_dir}/asset/sound/maou_se_battle14.mp3")
         self.es_attack_heavy = pygame.mixer.Sound(f"{base_dir}/asset/sound/maou_se_battle06.mp3")
         self.es_attack_missed = pygame.mixer.Sound(f"{base_dir}/asset/sound/maou_se_8bit26.mp3")
@@ -204,7 +204,13 @@ class World():
             threshold = waza["kakuritu"]/100.0
             players.waza_desc = waza["desc"]
             if random.random() < threshold:
-                players.damage_give = waza["damage"]
+                if "-" in waza["damage"]:
+                    damage = waza["damegi"].split("-")
+                    damage = int(random.randrange(damage[0], damage[1], 1))
+                    player.damage_give = damage
+                else:
+                    players.damage_give = int(waza["damage"])
+                    
                 players.waza_seikou = "成功"
             else:
                 players.damage_give = 0
@@ -215,7 +221,13 @@ class World():
                 threshold = waza["kakuritu"]/100.0
                 player.waza_desc = waza["desc"]
                 if random.random() < threshold:
-                    player.damage_give = waza["damage"]
+                    if "-" in waza["damage"]:
+                        damage = waza["damage"].split("-")
+                        damage = int(random.randrange(int(damage[0]), int(damage[1]), 1))
+                        player.damage_give = damage
+                    else:
+                        player.damage_give = int(waza["damage"])
+                        
                     player.waza_seikou = "成功"
                 else:
                     player.damage_give = 0

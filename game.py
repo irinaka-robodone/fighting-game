@@ -2,7 +2,7 @@ from world import World
 import argparse
 
 argparser = argparse.ArgumentParser()
-argparser.add_argument("--ai", required=True)
+argparser.add_argument("--ai", required=False, default=0)
 
 args = argparser.parse_args()
 ai_mode = str(args.ai)
