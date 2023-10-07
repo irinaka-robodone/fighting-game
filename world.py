@@ -23,7 +23,7 @@ class World():
         self.clock = pygame.time.Clock()
         pygame.init()
         self.ai_mode = ai_mode
-        self.screen = pygame.display.set_mode(self.SCREEN_SIZE)
+        self.screen = pygame.display.set_mode(self.SCREEN_SIZE, pygame.RESIZABLE)
         pygame.display.set_caption(self.TITLE)
         
         self.current_events = []
@@ -207,10 +207,10 @@ class World():
                 
                 if "-" in waza["damage"]:
                     damage = waza["damage"].split("-")
-                    damage = random.randrange(damage[0], damage[1])
+                    damage = int(random.randrange(int(damage[0]), int(damage[1]), 1))
                     players.damage_give = damage
                 else:
-                    players.damage_give = waza["damage"]
+                    players.damage_give = int(waza["damage"])
                 players.waza_seikou = "成功"
             else:
                 players.damage_give = 0
@@ -223,10 +223,10 @@ class World():
                 if random.random() < threshold:
                     if "-" in waza["damage"]:
                         damage = waza["damage"].split("-")
-                        damage = random.randrange(damage[0], damage[1])
-                        players.damage_give = damage
+                        damage = int(random.randrange(int(damage[0]), int(damage[1]), 1))
+                        player.damage_give = damage
                     else:
-                        players.damage_give = waza["damage"]
+                        player.damage_give = int(waza["damage"])
                     player.waza_seikou = "成功"
                 else:
                     player.damage_give = 0
