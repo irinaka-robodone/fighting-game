@@ -204,7 +204,13 @@ class World():
             threshold = waza["kakuritu"]/100.0
             players.waza_desc = waza["desc"]
             if random.random() < threshold:
-                players.damage_give = waza["damage"]
+                
+                if "-" in waza["damage"]:
+                    damage = waza["damage"].split("-")
+                    damage = random.randrange(damage[0], damage[1])
+                    players.damage_give = damage
+                else:
+                    players.damage_give = waza["damage"]
                 players.waza_seikou = "成功"
             else:
                 players.damage_give = 0
@@ -215,7 +221,12 @@ class World():
                 threshold = waza["kakuritu"]/100.0
                 player.waza_desc = waza["desc"]
                 if random.random() < threshold:
-                    player.damage_give = waza["damage"]
+                    if "-" in waza["damage"]:
+                        damage = waza["damage"].split("-")
+                        damage = random.randrange(damage[0], damage[1])
+                        players.damage_give = damage
+                    else:
+                        players.damage_give = waza["damage"]
                     player.waza_seikou = "成功"
                 else:
                     player.damage_give = 0

@@ -170,3 +170,5 @@ cython_debug/
 # sound/
 # secret*
 # secret*/
+test*
+test*/
