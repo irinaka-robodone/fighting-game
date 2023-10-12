@@ -3,7 +3,7 @@
 
 # 依存パッケージ
 ```
-Python 3.11 ~ 3.x
+Python 3.10 ~ 3.11.x
 pip 22.3 ~
 pygame 2.5.1
 pygame_gui 0.6.9
