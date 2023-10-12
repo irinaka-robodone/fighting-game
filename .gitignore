@@ -164,7 +164,11 @@ asset
 asset/
 .venv*
 .venv*/
-img
-img/
-sound
-sound/
+# img
+# img/
+# sound
+# sound/
+# secret*
+# secret*/
+test*
+test*/

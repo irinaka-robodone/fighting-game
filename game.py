@@ -1,7 +1,16 @@
 from world import World
+import argparse
 
-game_over = False
-world = World()
+argparser = argparse.ArgumentParser()
+argparser.add_argument("--ai", required=False, default=0)
 
-while not game_over:
+args = argparser.parse_args()
+ai_mode = str(args.ai)
+if ai_mode == "1":
+    ai_mode = True
+else:
+    ai_mode = False
+
+world = World(ai_mode)
+while world.running:
     world.process()
