@@ -1,4 +1,5 @@
 import pygame
+from pygame.locals import *
 
 class World():
     def __init__(self) -> None:
@@ -18,3 +19,4 @@ class World():
     def do_something(self):
         pass
     
+    def 
