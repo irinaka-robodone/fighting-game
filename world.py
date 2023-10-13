@@ -7,7 +7,7 @@ import pandas as pd
 import pygame_gui
 from pygame_textinput.textinput import TextInput
 
-from utils import render_text_center, render_text_middle, waza_loader
+from utils import render_text_center, render_text_middle, WazaLoader
 from ai import ai_response
 from component import Player
 
@@ -72,6 +72,7 @@ class World():
         self.input_box_player_name = TextInput(pygame.font.SysFont("yumincho", 30), self.font_color)
         
         self.elapsed_time = 0.0
+        self.waza_loader: WazaLoader
         
     
     def process(self): # ゲームの状態に応じて実行する関数を分ける
@@ -168,6 +169,9 @@ class World():
             
         if self.player_1.waza != None:
             render_text_middle("✔", [300, 56], 24, self.screen, self.font_color)
+            
+        if self.player_2.waza != None:
+            render_text_middle("✔", [860, 56], 24, self.screen, self.font_color)
         
         if self.player_1.waza != None and self.vs_computer == True and self.elapsed_time >= 3 and self.player_2.waza == None:
             self.player_2.waza = random.choice([0,1,2])
@@ -258,7 +262,7 @@ class World():
         
     def _judge_waza_success(self, players: list[Player] | Player):
         if type(players) == Player:
-            waza = (players.id)[players.waza]
+            waza = self.waza_loader.load_waza(players.id, player.waza)
             threshold = waza["kakuritu"]/100.0
             players.waza_desc = waza["desc"]
             if random.random() < threshold:
@@ -275,7 +279,7 @@ class World():
                 players.waza_seikou = "失敗"
         else:
             for player in players:
-                waza = waza_loader(player.id)[player.waza]
+                waza = self.waza_loader.load_waza(player.id, player.waza)
                 threshold = waza["kakuritu"]/100.0
                 player.waza_desc = waza["desc"]
                 if random.random() < threshold:
@@ -300,6 +304,7 @@ class World():
         render_text_middle(f"HP: {self.player_2.hp}", [740,60], 20, self.screen)
         
         if scene_name == "sentaku":
+            render_text_middle("VS", [480, 30], 24, self.screen)
             self._render_waza(self.player_1.id, pos=[100, 100])
             self._render_waza(self.player_2.id, pos=[640, 100])
             
@@ -309,13 +314,14 @@ class World():
             self._render_waza(self.player_2.id, pos=[640, 100])
             
         elif scene_name == "kekka":
+            render_text_middle("VS", [480, 30], 24, self.screen)
             if self.elapsed_time >= 1:
-                render_text_middle(f"{self.player_1.name}は「{waza_loader(self.player_1.id)[self.player_1.waza]['wazamei']}」を繰り出した！ {self.player_1.waza_seikou}", [480, 200], 20, self.screen, self.font_color)
+                render_text_middle(f"{self.player_1.name}は「{self.waza_loader.load_waza(self.player_1.id, self.player_1.waza)['wazamei']}」を繰り出した！ {self.player_1.waza_seikou}", [480, 200], 20, self.screen, self.font_color)
                 render_text_middle(f"- {self.player_2.damage_get}", [840, 56], 26, self.screen, [255,0,0], bold=True)
                 if ai_mode == True:
                     render_text_middle(f"{self.responses[0]}", [480, 230], 16, self.screen, bold=False)
             if self.elapsed_time >= 2:
-                render_text_middle(f"{self.player_2.name}は「{waza_loader(self.player_2.id)[self.player_2.waza]['wazamei']}」を繰り出した！ {self.player_2.waza_seikou}", [480, 270], 20, self.screen, self.font_color)
+                render_text_middle(f"{self.player_2.name}は「{self.waza_loader.load_waza(self.player_2.id, self.player_2.waza)['wazamei']}」を繰り出した！ {self.player_2.waza_seikou}", [480, 270], 20, self.screen, self.font_color)
                 render_text_middle(f"- {self.player_1.damage_get}", [300, 56], 26, self.screen, [255,0,0], bold=True)
                 if ai_mode == True:
                     render_text_middle(f"{self.responses[1]}", [480, 300], 16, self.screen, bold=False)
@@ -323,9 +329,9 @@ class World():
         elif scene_name == "katimake":
             self._render_waza(self.player_1.id, pos=[100, 100])
             self._render_waza(self.player_2.id, pos=[640, 100])
-            render_text_middle(f"{self.player_1.name}は「{waza_loader(self.player_1.id)[self.player_1.waza]['wazamei']}」を繰り出した！ {self.player_1.waza_seikou}", [480, 200], 20, self.screen, self.font_color)
+            render_text_middle(f"{self.player_1.name}は「{self.waza_loader.load_waza(self.player_1.id, self.player_1.waza)['wazamei']}」を繰り出した！ {self.player_1.waza_seikou}", [480, 200], 20, self.screen, self.font_color)
             render_text_middle(f"- {self.player_2.damage_get}", [840, 56], 26, self.screen, [255,0,0], bold=True)
-            render_text_middle(f"{self.player_2.name}は「{waza_loader(self.player_2.id)[self.player_2.waza]['wazamei']}」を繰り出した！ {self.player_2.waza_seikou}", [480, 270], 20, self.screen, self.font_color)
+            render_text_middle(f"{self.player_2.name}は「{self.waza_loader.load_waza(self.player_2.id, self.player_2.waza)['wazamei']}」を繰り出した！ {self.player_2.waza_seikou}", [480, 270], 20, self.screen, self.font_color)
             render_text_middle(f"- {self.player_1.damage_get}", [300, 56], 26, self.screen, [255,0,0], bold=True)
             
             if self.player_1.hp <= 0 and self.player_2.hp <= 0:
@@ -458,7 +464,7 @@ class World():
             
     
     def _render_waza(self, player_id: int, pos: list):
-        waza_list = waza_loader(player_id)
+        waza_list = self.waza_loader.load_player_waza_list(player_id)
         for i,waza in enumerate(waza_list):
             render_text_middle(f'{waza["wazamei"]} [{waza["key"]}]', [pos[0], pos[1]+30*i], 16, self.screen)
             render_text_middle(f'ダメージ: {waza["damage"]}', [pos[0]+100, pos[1]+30*i], 15, self.screen)
@@ -475,6 +481,8 @@ class World():
         print(self.elapsed_time)
 
 if __name__ == "__main__":
-    # scene_switcher()
-    waza_list = waza_loader(1)[2]["wazamei"]
-    print(waza_list)
+    world = World(ai_mode=True, vs_computer=True)
+    waza_loader = WazaLoader("asset/test/waza_test.csv")
+    world.waza_loader = waza_loader
+    while True:
+        world.process()
