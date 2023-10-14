@@ -37,16 +37,14 @@ class World():
         self.bg_color = (230,230,230)
         self.font_color = (20,20,20)
         
-<<<<<<< HEAD
+
         self.img1 = pygame.image.load(f"{base_dir}/asset/img/sannin.jpg")
         self.img2 = pygame.image.load(f"{base_dir}/asset/img/taiho.jpg")
-=======
         self.fade_color = 20
         self.fade_inversion = 230
         
         self.img1 = pygame.image.load(f"{base_dir}/asset/test/bread_boy.png")
         self.img2 = pygame.image.load(f"{base_dir}/asset/test/villain_fire.png")
->>>>>>> origin/20231014
         self.img1 = pygame.transform.scale(self.img1, (300, 300))
         self.img2 = pygame.transform.scale(self.img2, (300, 300))
         
@@ -224,6 +222,7 @@ class World():
                 df = pd.DataFrame(data[1:], index=None, columns=data[0])
                 self.responses = ai_response.get_script(df, max_retries=2, temperature=0.8)
                 self.elapsed_time = 0.0
+
             else:
                 pass
             
@@ -294,6 +293,8 @@ class World():
                 player.waza_desc = waza["desc"]
                 player.yuuri =  waza["yuuri"]
                 player.waza_id = waza["id"]
+                player.waza_kind = waza["kind"]
+                player.guard = waza["guard"]
                 if random.random() < threshold:
                     player.heal = waza["heal"]
                     if "-" in str(waza["damage"]):
@@ -303,8 +304,8 @@ class World():
                     else:
                         
                         player.damage_give = int(waza["damage"])
-                    if "-" in waza["damage"]:
-                        damage = waza["damage"].split("-")
+                    if "-" in str(waza["damage"]):
+                        damage = str(waza["damage"]).split("-")
                         damage = int(random.randrange(int(damage[0]), int(damage[1]), 1))
                         player.damage_give = damage
                     else:
@@ -323,6 +324,10 @@ class World():
                     
         self.player_1.damage_get = self.player_2.damage_give
         self.player_2.damage_get = self.player_1.damage_give
+        
+        for player in self.players:
+            if player.waza_kind == "guard":
+                player.damage_get *= player.guard
     
     def _render_status(self, scene_name: str, ai_mode: bool = False):
         render_text_middle(f"{self.player_1.name}", [200,30], 20, self.screen)
@@ -430,9 +435,12 @@ class World():
                 elif event.key == K_e:
                     if scene_name == "sentaku":
                         self.player_1.waza = 2
-                elif event.key == K_r:
+                elif event.key == K_t:
                     if scene_name == "sentaku":
                         self.player_1.waza = 3
+                # elif event.key == K_t:
+                #     if scene_name == "sentaku":
+                #         self.player_1.waza = 4
                 elif event.key == K_i and self.vs_computer == False:
                     if scene_name == "sentaku":
                         self.player_2.waza = 0
@@ -442,9 +450,12 @@ class World():
                 elif event.key == K_p and self.vs_computer == False:
                     if scene_name == "sentaku":
                         self.player_2.waza = 2
-                elif event.key == K_u and self.vs_computer == False:
+                elif event.key == K_k and self.vs_computer == False:
                     if scene_name == "sentaku":
                         self.player_2.waza = 3
+                # elif event.key == K_k and self.vs_computer == False:
+                #     if scene_name == "sentaku":
+                #         self.player_2.waza = 4
                 
             elif event.type == pygame.USEREVENT:
                 if scene_name.__contains__("input_name"):
