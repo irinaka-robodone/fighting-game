@@ -9,12 +9,12 @@ from pygame_textinput.textinput import TextInput
 
 from utils import render_text_center, render_text_middle, WazaLoader
 from ai import ai_response
-from component import Player
+from component import Player, Enemy
 
 base_dir = os.environ.get("BASE_DIR")
 
 class World():
-    def __init__(self, ai_mode: bool = False, vs_computer: bool = True) -> None:
+    def __init__(self, ai_mode: bool = False, vs_computer: bool = True, dev_mode: bool = True) -> None:
         self.SCREEN_SIZE = [960, 640]
         self.TITLE = "言うほどしょぼくない格ゲー"
         self.scene = "start"
@@ -75,6 +75,8 @@ class World():
         self.responses = ["", ""]
         
         self.players = [self.player_1, self.player_2]
+        self.next_enemy_level = 0
+        self.dev_mode = dev_mode
     
     def process(self): # ゲームの状態に応じて実行する関数を分ける
         self.time_delta = self.clock.tick(self.FPS)/1000.0
@@ -93,6 +95,9 @@ class World():
             self.input_name(self.player_2)
         elif self.scene == "321go":
             self.go321()
+        elif self.scene == "update_enemy":
+            self.update_enemy()
+        
         self._update_screen()
         self._control_sound()
         self.scene_timer()
@@ -257,7 +262,22 @@ class World():
         
         self._get_event()
         self._handle_event(self.scene)
+    
+    def update_enemy(self):
+        """これまでに倒した敵の情報から、次に倒す敵を作成して新しいバトルを開始するメソッド
+        """
+        self._get_event()
+        self._handle_event()
         
+        self.next_enemy = self.get_enemy_by_level(self.next_enemy_level)
+        self.player_2 = self.next_enemy
+        self.next_enemy = None        
+        self.next_enemy_level += 1
+        
+        self.players[1] = self.player_2
+
+        self.scene = "sentaku"
+    
     def _get_event(self):
         if len(self.current_events) > 0:
             self.prev_events = self.current_events
@@ -362,6 +382,7 @@ class World():
             elif self.player_2.hp <= 0:
                 text_result = f'{self.player_1.name}の勝ち'
                 self.screen.blit(self.img_loser_mark, [600, 320])
+                self.update_enemy()
                 
             if self.elapsed_time > 1:
                 render_text_middle(text_result, [480, 20], 30, self.screen)
@@ -431,6 +452,8 @@ class World():
                 elif event.key == K_u and self.vs_computer == False:
                     if scene_name == "sentaku":
                         self.player_2.waza = 3
+                elif event.key == K_n and self.dev_mode == True:
+                    self.update_enemy()
                 
             elif event.type == pygame.USEREVENT:
                 if scene_name.__contains__("input_name"):
@@ -482,7 +505,7 @@ class World():
                                 manager=self.manager)
             self.next_turn_button.disable()
             self.end_choice_button.enable()
-            self.scene = "sentaku"
+            self.scene = "update_enemy"
             
     
     def _render_waza(self, player_id: int, pos: list):
@@ -501,6 +524,18 @@ class World():
             self.elapsed_time = 0
         self.elapsed_time += self.time_delta
         print(self.elapsed_time)
+        
+    def get_enemy_by_level(self, level: int) -> Enemy:
+        self.waza_loader = WazaLoader(f"asset/test/enemy/enemy{level}.csv")
+        self.img2 = pygame.image.load(f"asset/test/enemy/enemy{level}.png")
+        self.img2 = pygame.transform.scale(self.img2, (300, 300))
+        enemy = Enemy(100 + 10*level, 2, name = "test", level = level)
+        # for enemy in self.enemies:
+        #     if enemy.level == level:
+        #         print(f"Next enemy: {enemy}")
+        #         return enemy
+        return enemy
+    
 
 if __name__ == "__main__":
     world = World(ai_mode=True, vs_computer=True)
