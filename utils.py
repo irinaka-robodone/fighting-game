@@ -14,11 +14,21 @@ def render_text_center(text: str, size, screen: pygame.Surface, color: tuple[int
     rect = text.get_rect()
     screen.blit(text, ((screen_size[0] - rect.w)//2, (screen_size[1] - rect.h)//2))
 
-def waza_loader(player_id: str):
-    import os
-    base_dir = os.environ.get("BASE_DIR")
-    waza = pd.read_csv(f"{base_dir}/waza.csv", sep=",", encoding="utf-8", header=0)
-    return waza[waza.player==player_id].to_dict('records')
+class WazaLoader():
+    def __init__(self, filepath: str) -> None:
+        import os
+        base_dir = os.environ.get("BASE_DIR")
+        self.__waza_df = pd.read_csv(f"{base_dir}/{filepath}", sep=",", encoding="utf-8", header=0)
+        
+    def load_player_waza_list(self, player_id) -> list[dict]:
+        return self.__waza_df[self.__waza_df.player==player_id].to_dict('records')
+    
+    def load_waza(self, player_id, waza_id) -> dict:
+        return self.load_player_waza_list(player_id)[waza_id]
+    
+    @property
+    def waza_df(self) -> pd.DataFrame:
+        return self.__waza_df 
 
 def scene_switcher(scene_from: str = "start"):
     import os

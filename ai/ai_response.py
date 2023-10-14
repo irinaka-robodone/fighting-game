@@ -8,7 +8,7 @@ from langchain.chat_models import ChatOpenAI
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
-def get_script(data: pd.DataFrame, model_name: str = "gpt-4", temperature: float = 0.3, max_tokens: int = 500, max_retries: int = 3):
+def get_script(data: pd.DataFrame, model_name: str = "gpt-4", temperature: float = 0.3, max_tokens: int = 500, max_retries: int = 2):
     """
     # ゲームの進行状態を参考に、自然言語モデルからNPC、プレイヤーのセリフを出力させる関数
     
@@ -31,7 +31,7 @@ def get_script(data: pd.DataFrame, model_name: str = "gpt-4", temperature: float
     context = template.template_context_fight_1on1.format(fight_status=game_status)
     question = template.template_question_fight_1on1.format(player_1_id = player_1_id, player_2_id = player_2_id, player_1=player_1_name, player_2=player_2_name)
     
-    llm = ChatOpenAI(model_name = model_name, temperature=0.0, max_tokens=max_tokens, max_retries=max_retries)
+    llm = ChatOpenAI(model_name = model_name, temperature=0.0, max_tokens=max_tokens, max_retries=max_retries, request_timeout=30)
     
     qa_prompt = PromptTemplate(
         template=qa_template, input_variables=["context", "question"]
@@ -40,26 +40,27 @@ def get_script(data: pd.DataFrame, model_name: str = "gpt-4", temperature: float
         llm=llm,
         prompt=qa_prompt
     )
-    
-    res = qa_chain.run({"context": context, "question": question})
-    
-    f = io.StringIO()
-    f.write(res)
-    f.seek(0)
-    # csvモジュールで読み出し
-    csv_reader = csv.reader(f, delimiter=",")
-    res = [row for row in csv_reader]
-    
-    df = pd.DataFrame(res, columns=["player_id","player_name", "response"], index=None)
-    df = df.astype(str)
-    df["player_id"] = df["player_id"].str.strip()
-    
-    player_1_res = df[df["player_id"] == "1"].values[0][2]
-    player_2_res = df[df["player_id"] == "2"].values[0][2]
-    
-    ret = [player_1_res, player_2_res]
-    print(f"{player_1_name}: {player_1_res}")
-    print(f"{player_2_name}: {player_2_res}")
+    try:
+        res = qa_chain.run({"context": context, "question": question})
+        f = io.StringIO()
+        f.write(res)
+        f.seek(0)
+        # csvモジュールで読み出し
+        csv_reader = csv.reader(f, delimiter=",")
+        res = [row for row in csv_reader]
+        
+        df = pd.DataFrame(res, columns=["player_id","player_name", "response"], index=None)
+        df = df.astype(str)
+        df["player_id"] = df["player_id"].str.strip()
+        
+        player_1_res = df[df["player_id"] == "1"].values[0][2]
+        player_2_res = df[df["player_id"] == "2"].values[0][2]
+        
+        ret = [player_1_res, player_2_res]
+        print(f"{player_1_name}: {player_1_res}")
+        print(f"{player_2_name}: {player_2_res}")
+    except:
+        ret = ["", ""]
     
     return ret
     
