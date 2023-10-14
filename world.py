@@ -16,7 +16,7 @@ base_dir = os.environ.get("BASE_DIR")
 class World():
     def __init__(self, ai_mode: bool = False, vs_computer: bool = True) -> None:
         self.SCREEN_SIZE = [960, 640]
-        self.TITLE = "格闘ゲーム"
+        self.TITLE = "言うほどしょぼくない格ゲー"
         self.scene = "start"
         self.scene_prev = "launch"
         self.running = True
@@ -40,9 +40,8 @@ class World():
         self.fade_color = 20
         self.fade_inversion = 230
         
-        
         self.img1 = pygame.image.load(f"{base_dir}/asset/test/bread_boy.png")
-        self.img2 = pygame.image.load(f"{base_dir}/asset/test/villain.png")
+        self.img2 = pygame.image.load(f"{base_dir}/asset/test/villain_fire.png")
         self.img1 = pygame.transform.scale(self.img1, (300, 300))
         self.img2 = pygame.transform.scale(self.img2, (300, 300))
         
@@ -113,7 +112,7 @@ class World():
         bg_color, text_color = self.fadein_out()
         
         self.screen.fill(bg_color)
-        render_text_middle("リアル法廷バトル", (self.SCREEN_SIZE[0]//2, self.SCREEN_SIZE[1]//2-20), 32, self.screen, text_color)
+        render_text_middle(self.TITLE, (self.SCREEN_SIZE[0]//2, self.SCREEN_SIZE[1]//2-20), 32, self.screen, text_color)
         render_text_middle("スペースキーを押してスタート", (self.SCREEN_SIZE[0]//2, self.SCREEN_SIZE[1]//2+20), 16, self.screen, text_color)
         
         self._get_event()
@@ -417,6 +416,9 @@ class World():
                 elif event.key == K_e:
                     if scene_name == "sentaku":
                         self.player_1.waza = 2
+                elif event.key == K_r:
+                    if scene_name == "sentaku":
+                        self.player_1.waza = 3
                 elif event.key == K_i and self.vs_computer == False:
                     if scene_name == "sentaku":
                         self.player_2.waza = 0
@@ -426,6 +428,9 @@ class World():
                 elif event.key == K_p and self.vs_computer == False:
                     if scene_name == "sentaku":
                         self.player_2.waza = 2
+                elif event.key == K_u and self.vs_computer == False:
+                    if scene_name == "sentaku":
+                        self.player_2.waza = 3
                 
             elif event.type == pygame.USEREVENT:
                 if scene_name.__contains__("input_name"):
