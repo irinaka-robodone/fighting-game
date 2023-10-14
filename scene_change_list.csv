@@ -1,0 +1,4 @@
+from,to,key
+start,main,space
+start,exit,esc
+main,start,esc
