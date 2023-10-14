@@ -160,8 +160,8 @@ cython_debug/
 #.idea/
 
 # User defined
-asset
-asset/
+# asset
+# asset/
 .venv*
 .venv*/
 # img
