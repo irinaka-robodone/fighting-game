@@ -282,6 +282,7 @@ class World():
                 waza = self.waza_loader.load_waza(player.id, player.waza)
                 threshold = waza["kakuritu"]/100.0
                 player.waza_desc = waza["desc"]
+                player.waza_id = waza["id"]
                 if random.random() < threshold:
                     if "-" in str(waza["damage"]):
                         damage = str(waza["damage"]).split("-")
@@ -293,6 +294,10 @@ class World():
                 else:
                     player.damage_give = 0
                     player.waza_seikou = "失敗"
+                    
+            for i, player in enumerate(players):
+                teki = players[i-1]
+                
                     
         self.player_1.damage_get = self.player_2.damage_give
         self.player_2.damage_get = self.player_1.damage_give
