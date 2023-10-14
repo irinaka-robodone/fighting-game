@@ -278,7 +278,7 @@ class World():
                     players.damage_give = int(waza["damage"])
                 players.waza_seikou = "成功"
             else:
-                players.damage_give = 0
+                players.damage_give = 0                              
                 players.waza_seikou = "失敗"
         else:
             for player in players:
@@ -287,6 +287,8 @@ class World():
                 player.waza_desc = waza["desc"]
                 player.yuuri =  waza["yuuri"]
                 player.waza_id = waza["id"]
+                player.waza_kind = waza["kind"]
+                player.guard = waza["guard"]
                 if random.random() < threshold:
                     player.heal = waza["heal"]
                     if "-" in str(waza["damage"]):
@@ -310,6 +312,9 @@ class World():
         self.player_1.damage_get = self.player_2.damage_give
         self.player_2.damage_get = self.player_1.damage_give
     
+        for player in self.players:
+            if player.waza_kind == "guard":
+                player.damage_get *= player.guard
     def _render_status(self, scene_name: str, ai_mode: bool = False):
         render_text_middle(f"{self.player_1.name}", [200,30], 20, self.screen)
         render_text_middle(f"HP: {self.player_1.hp}", [200,60], 20, self.screen)
@@ -419,6 +424,9 @@ class World():
                 elif event.key == K_r:
                     if scene_name == "sentaku":
                         self.player_1.waza = 3
+                elif event.key == K_t:
+                    if scene_name == "sentaku":
+                        self.player_1waza =4
                 elif event.key == K_i and self.vs_computer == False:
                     if scene_name == "sentaku":
                         self.player_2.waza = 0
