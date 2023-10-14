@@ -41,8 +41,8 @@ class World():
         self.fade_inversion = 230
         
         
-        self.img1 = pygame.image.load(f"{base_dir}/asset/img/sleepy_boy.png")
-        self.img2 = pygame.image.load(f"{base_dir}/asset/img/salary_person_male.png")
+        self.img1 = pygame.image.load(f"{base_dir}/asset/test/bread_boy.png")
+        self.img2 = pygame.image.load(f"{base_dir}/asset/test/villain.png")
         self.img1 = pygame.transform.scale(self.img1, (300, 300))
         self.img2 = pygame.transform.scale(self.img2, (300, 300))
         
@@ -482,7 +482,7 @@ class World():
 
 if __name__ == "__main__":
     world = World(ai_mode=True, vs_computer=True)
-    waza_loader = WazaLoader("asset/test/waza_test.csv")
+    waza_loader = WazaLoader("asset/test/waza_character.csv")
     world.waza_loader = waza_loader
     while True:
         world.process()
