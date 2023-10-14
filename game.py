@@ -19,7 +19,7 @@ if cpu_mode == "1":
 else:
     cpu_mode = False
 
-waza_loader = WazaLoader("asset/test/waza_character.csv")
+waza_loader = WazaLoader("asset/test/waza_test.csv")
 world = World(ai_mode, cpu_mode)
 world.waza_loader = waza_loader
 

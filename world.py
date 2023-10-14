@@ -73,7 +73,9 @@ class World():
         
         self.elapsed_time = 0.0
         self.waza_loader: WazaLoader
+        self.responses = ["", ""]
         
+        self.players = [self.player_1, self.player_2]
     
     def process(self): # ゲームの状態に応じて実行する関数を分ける
         self.time_delta = self.clock.tick(self.FPS)/1000.0
@@ -174,7 +176,7 @@ class World():
             render_text_middle("✔", [860, 56], 24, self.screen, self.font_color)
         
         if self.player_1.waza != None and self.vs_computer == True and self.elapsed_time >= 3 and self.player_2.waza == None:
-            self.player_2.waza = random.choice([0,1,2])
+            self.player_2.waza = random.choice([0,1,2,3])
             print(self.player_2.waza)
             
         self._handle_event(self.scene)
@@ -193,8 +195,10 @@ class World():
         """
         if self.n < 1:
             self._judge_waza_success([self.player_1, self.player_2])
-            self.player_1.hp -= self.player_1.damage_get
-            self.player_2.hp -= self.player_2.damage_get
+            
+            for player in self.players:
+                player.hp -= player.damage_get
+                player.hp += player.heal
             
             if ai_mode == True:
                 render_text_center("AI思考中", 32, self.screen, self.font_color)
@@ -212,7 +216,7 @@ class World():
                         ["プレイヤー2の出した技の結果", self.player_2.waza_seikou]]
                 
                 df = pd.DataFrame(data[1:], index=None, columns=data[0])
-                self.responses = ai_response.get_script(df, max_retries=1, temperature=0.8)
+                self.responses = ai_response.get_script(df, max_retries=2, temperature=0.8)
                 self.elapsed_time = 0.0
             else:
                 pass
@@ -282,22 +286,27 @@ class World():
                 waza = self.waza_loader.load_waza(player.id, player.waza)
                 threshold = waza["kakuritu"]/100.0
                 player.waza_desc = waza["desc"]
+                player.yuuri =  waza["yuuri"]
                 player.waza_id = waza["id"]
                 if random.random() < threshold:
+                    player.heal = waza["heal"]
                     if "-" in str(waza["damage"]):
                         damage = str(waza["damage"]).split("-")
                         damage = int(random.randrange(int(damage[0]), int(damage[1]), 1))
                         player.damage_give = damage
                     else:
+                        
                         player.damage_give = int(waza["damage"])
                     player.waza_seikou = "成功"
                 else:
+                    player.heal = 0
                     player.damage_give = 0
                     player.waza_seikou = "失敗"
                     
             for i, player in enumerate(players):
                 teki = players[i-1]
-                
+                if player.yuuri == teki.waza_id:
+                    teki.damage_give *= 0.5
                     
         self.player_1.damage_get = self.player_2.damage_give
         self.player_2.damage_get = self.player_1.damage_give
@@ -323,11 +332,14 @@ class World():
             if self.elapsed_time >= 1:
                 render_text_middle(f"{self.player_1.name}は「{self.waza_loader.load_waza(self.player_1.id, self.player_1.waza)['wazamei']}」を繰り出した！ {self.player_1.waza_seikou}", [480, 200], 20, self.screen, self.font_color)
                 render_text_middle(f"- {self.player_2.damage_get}", [840, 56], 26, self.screen, [255,0,0], bold=True)
+                render_text_middle(f"+ {self.player_2.heal}", [840, 24], 26, self.screen, [0,0,255], bold=True)
+
                 if ai_mode == True:
                     render_text_middle(f"{self.responses[0]}", [480, 230], 16, self.screen, bold=False)
             if self.elapsed_time >= 2:
                 render_text_middle(f"{self.player_2.name}は「{self.waza_loader.load_waza(self.player_2.id, self.player_2.waza)['wazamei']}」を繰り出した！ {self.player_2.waza_seikou}", [480, 270], 20, self.screen, self.font_color)
                 render_text_middle(f"- {self.player_1.damage_get}", [300, 56], 26, self.screen, [255,0,0], bold=True)
+                render_text_middle(f"+ {self.player_1.heal}", [300, 24], 26, self.screen, [0,0,255], bold=True)
                 if ai_mode == True:
                     render_text_middle(f"{self.responses[1]}", [480, 300], 16, self.screen, bold=False)
             
@@ -440,7 +452,7 @@ class World():
                         self._player_1_attack_was_displayed = False
                         self.end_choice_button.disable()
                         self.next_turn_button.enable()
-                        self.responses = ["", ""]
+                        # self.responses = ["", ""]
                         print(self.scene)
                 
                 if event.ui_element == self.next_turn_button:
