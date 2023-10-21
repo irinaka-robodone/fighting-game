@@ -16,7 +16,7 @@ base_dir = os.environ.get("BASE_DIR")
 class World():
     def __init__(self, ai_mode: bool = False, vs_computer: bool = True) -> None:
         self.SCREEN_SIZE = [960, 640]
-        self.TITLE = "言うほどしょぼくない格ゲー"
+        self.TITLE = "リアル法廷アクションゲーム"
         self.scene = "start"
         self.scene_prev = "launch"
         self.running = True
@@ -38,13 +38,10 @@ class World():
         self.font_color = (20,20,20)
         
 
-        self.img1 = pygame.image.load(f"{base_dir}/asset/img/sannin.jpg")
-        self.img2 = pygame.image.load(f"{base_dir}/asset/img/taiho.jpg")
+        self.img1 = pygame.image.load(f"{base_dir}/asset/img/prosecutor.png")
+        self.img2 = pygame.image.load(f"{base_dir}/asset/img/counsel.png")
         self.fade_color = 20
         self.fade_inversion = 230
-        
-        self.img1 = pygame.image.load(f"{base_dir}/asset/test/bread_boy.png")
-        self.img2 = pygame.image.load(f"{base_dir}/asset/test/villain_fire.png")
         self.img1 = pygame.transform.scale(self.img1, (300, 300))
         self.img2 = pygame.transform.scale(self.img2, (300, 300))
         
@@ -351,7 +348,7 @@ class World():
                 render_text_middle(f"{self.player_1.name}は「{self.waza_loader.load_waza(self.player_1.id, self.player_1.waza)['wazamei']}」を繰り出した！ {self.player_1.waza_seikou}", [480, 200], 20, self.screen, self.font_color)
                 render_text_middle(f"- {self.player_2.damage_get}", [840, 56], 26, self.screen, [255,0,0], bold=True)
                 render_text_middle(f"+ {self.player_2.heal}", [840, 24], 26, self.screen, [0,0,255], bold=True)
-
+                
                 if ai_mode == True:
                     render_text_middle(f"{self.responses[0]}", [480, 230], 16, self.screen, bold=False)
             if self.elapsed_time >= 2:
