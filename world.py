@@ -56,7 +56,7 @@ def render_text(text, pos, screen, size=24, bold=True):
 class World():
     def __init__(self, ai_mode: bool = False, vs_computer: bool = True) -> None:
         self.SCREEN_SIZE = [960, 640]
-        self.TITLE = "言うほどしょぼくない格ゲー"
+        self.TITLE = "コマンド式格闘ゲーム"
         self.scene = "start"
         self.scene_prev = "launch"
         self.running = True
@@ -80,8 +80,8 @@ class World():
         self.fade_color = 20
         self.fade_inversion = 230
         
-        self.img1 = pygame.image.load(f"{base_dir}/asset/test/bread_boy.png")
-        self.img2 = pygame.image.load(f"{base_dir}/asset/test/villain_fire.png")
+        self.img1 = pygame.image.load(f"{base_dir}/asset/img/bluebird_freeze.png")
+        self.img2 = pygame.image.load(f"{base_dir}/asset/img/bluebird_enjou.png")
         self.img1 = pygame.transform.scale(self.img1, (300, 300))
         self.img2 = pygame.transform.scale(self.img2, (300, 300))
         
@@ -100,8 +100,8 @@ class World():
         self.channel1.set_volume(0.2)
         self.channel2.set_volume(0.5)
         
-        self.bgm_fight = pygame.mixer.Sound(f"{base_dir}/asset/sound/maou_bgm_8bit15.mp3")
-        self.sound_title_call = pygame.mixer.Sound(f"{base_dir}/asset/sound/maou_bgm_8bit15.mp3")
+        self.bgm_fight = pygame.mixer.Sound(f"{base_dir}/asset/sound/maou_bgm_8bit29.mp3")
+        self.sound_title_call = pygame.mixer.Sound(f"{base_dir}/asset/sound/maou_bgm_8bit29.mp3")
         self.es_attack_normal = pygame.mixer.Sound(f"{base_dir}/asset/sound/maou_se_battle14.mp3")
         self.es_attack_heavy = pygame.mixer.Sound(f"{base_dir}/asset/sound/maou_se_battle06.mp3")
         self.es_attack_missed = pygame.mixer.Sound(f"{base_dir}/asset/sound/maou_se_8bit26.mp3")
@@ -327,6 +327,8 @@ class World():
                 player.waza_desc = waza["desc"]
                 player.yuuri =  waza["yuuri"]
                 player.waza_id = waza["id"]
+                player.wasa_kind = waza["kind"]
+                player.guard = waza["guard"]
                 if random.random() < threshold:
                     player.heal = waza["heal"]
                     if "-" in str(waza["damage"]):
@@ -347,8 +349,14 @@ class World():
                 if player.yuuri == teki.waza_id:
                     teki.damage_give *= 0.5
                     
+                    
+                    
         self.player_1.damage_get = self.player_2.damage_give
         self.player_2.damage_get = self.player_1.damage_give
+        
+        for player in self.players:
+            if player.wasa_kind == "guard":
+                player.damage_get *= player.guard
     
     def _render_status(self, scene_name: str, ai_mode: bool = False):
         render_text_middle(f"{self.player_1.name}", [200,30], 20, self.screen)
@@ -459,6 +467,9 @@ class World():
                 elif event.key == K_r:
                     if scene_name == "sentaku":
                         self.player_1.waza = 3
+                elif event.key == K_t:
+                    if scene_name == "sentaku":
+                        self.player_1.waza = 4
                 elif event.key == K_i and self.vs_computer == False:
                     if scene_name == "sentaku":
                         self.player_2.waza = 0
