@@ -290,7 +290,7 @@ class World():
                 player.waza_kind = waza ["kind"]
                 player.guard = waza ["guard"]
                 if random.random() < threshold:
-                    player.heal = waza["heal"]
+                    player.heal = int(waza["heal"])
                     if "-" in str(waza["damage"]):
                         damage = str(waza["damage"]).split("-")
                         damage = int(random.randrange(int(damage[0]), int(damage[1]), 1))
