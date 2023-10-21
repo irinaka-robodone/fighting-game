@@ -7,9 +7,9 @@ import pandas as pd
 import pygame_gui
 from pygame_textinput.textinput import TextInput
 
-from utils import render_text_center, render_text_middle, WazaLoader
-from ai import ai_response
-from component import Player, Enemy
+from src.utils import render_text_center, render_text_middle, WazaLoader
+from src.ai import ai_response
+from src.component import Player, Enemy
 
 base_dir = os.environ.get("BASE_DIR")
 
@@ -40,8 +40,8 @@ class World():
         self.fade_color = 20
         self.fade_inversion = 230
         
-        self.img1 = pygame.image.load(f"{base_dir}/asset/test/bread_boy.png")
-        self.img2 = pygame.image.load(f"{base_dir}/asset/test/villain_fire.png")
+        self.img1 = pygame.image.load(f"{base_dir}/asset/img/bread_boy.png")
+        self.img2 = pygame.image.load(f"{base_dir}/asset/img/enemy0.png")
         self.img1 = pygame.transform.scale(self.img1, (300, 300))
         self.img2 = pygame.transform.scale(self.img2, (300, 300))
         
@@ -60,15 +60,15 @@ class World():
         self.channel1.set_volume(0.2)
         self.channel2.set_volume(0.5)
         
-        self.bgm_fight = pygame.mixer.Sound(f"{base_dir}/asset/sound/maou_bgm_8bit15.mp3")
-        self.sound_title_call = pygame.mixer.Sound(f"{base_dir}/asset/sound/maou_bgm_8bit15.mp3")
-        self.es_attack_normal = pygame.mixer.Sound(f"{base_dir}/asset/sound/maou_se_battle14.mp3")
-        self.es_attack_heavy = pygame.mixer.Sound(f"{base_dir}/asset/sound/maou_se_battle06.mp3")
-        self.es_attack_missed = pygame.mixer.Sound(f"{base_dir}/asset/sound/maou_se_8bit26.mp3")
+        self.bgm_fight = pygame.mixer.Sound(f"{base_dir}/asset/sound/bgm.mp3")
+        self.sound_title_call = pygame.mixer.Sound(f"{base_dir}/asset/sound/bgm.mp3")
+        self.es_attack_normal = pygame.mixer.Sound(f"{base_dir}/asset/sound/se_battle14.mp3")
+        self.es_attack_heavy = pygame.mixer.Sound(f"{base_dir}/asset/sound/se_battle06.mp3")
+        self.es_attack_missed = pygame.mixer.Sound(f"{base_dir}/asset/sound/se_8bit26.mp3")
         
         self.channel2.play(self.sound_title_call, loops=0)
         
-        self.input_box_player_name = TextInput(pygame.font.SysFont("yumincho", 30), self.font_color)
+        self.input_box_player_name = TextInput(pygame.font.SysFont("Meiryo", 30), self.font_color)
         
         self.elapsed_time = 0.0
         self.waza_loader: WazaLoader
@@ -535,10 +535,10 @@ class World():
         print(self.elapsed_time)
         
     def get_enemy_by_level(self, level: int) -> Enemy:
-        self.waza_loader = WazaLoader(f"asset/test/enemy/enemy{level}.csv")
-        self.img2 = pygame.image.load(f"asset/test/enemy/enemy{level}.png")
+        self.waza_loader = WazaLoader(f"asset/stage{level}.csv")
+        self.img2 = pygame.image.load(f"asset/img/enemy{level}.png")
         self.img2 = pygame.transform.scale(self.img2, (300, 300))
-        enemy = Enemy(100 + 10*level, 2, name = "test", level = level)
+        enemy = Enemy(100 + 10*level, 2, name = f"ボス{level}", level = level)
         # for enemy in self.enemies:
         #     if enemy.level == level:
         #         print(f"Next enemy: {enemy}")
