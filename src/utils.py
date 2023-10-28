@@ -18,6 +18,7 @@ class WazaLoader():
     def __init__(self, filepath: str) -> None:
         import os
         base_dir = os.environ.get("BASE_DIR")
+        base_dir += "/src/"
         self.__waza_df = pd.read_csv(f"{base_dir}/{filepath}", sep=",", encoding="utf-8", header=0)
         
     def load_player_waza_list(self, player_id) -> list[dict]:

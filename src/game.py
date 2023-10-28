@@ -3,8 +3,8 @@ subprocess.Popen('PAUSE', shell=True)
 
 # import argparse
 
-from src import world
-from src import utils
+import world
+import utils
 
 # argparser = argparse.ArgumentParser()
 # argparser.add_argument("--ai", required=False, default=0)
@@ -22,7 +22,7 @@ from src import utils
 # else:
 #     cpu_mode = False
 
-waza_loader = utils.WazaLoader("asset/enemy0.csv")
+waza_loader = utils.WazaLoader("asset/waza.csv")
 world = world.World(False, True, False)
 world.waza_loader = waza_loader
 

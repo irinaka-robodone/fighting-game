@@ -1,1 +1,1 @@
-from src import game, component, world, utils, ai
+from . import game, component, world, utils, ai

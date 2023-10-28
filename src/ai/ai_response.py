@@ -5,7 +5,7 @@ import pandas as pd
 from langchain import PromptTemplate, LLMChain
 from langchain.chat_models import ChatOpenAI
 
-from src.ai import template
+from . import template
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
 def get_script(data: pd.DataFrame, model_name: str = "gpt-4", temperature: float = 0.3, max_tokens: int = 500, max_retries: int = 2):

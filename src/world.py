@@ -7,11 +7,12 @@ import pandas as pd
 import pygame_gui
 from pygame_textinput.textinput import TextInput
 
-from src.utils import render_text_center, render_text_middle, WazaLoader
-from src.ai import ai_response
-from src.component import Player, Enemy
+from utils import render_text_center, render_text_middle, WazaLoader
+from ai import ai_response
+from component import Player, Enemy
 
 base_dir = os.environ.get("BASE_DIR")
+base_dir += "/src/"
 
 class World():
     def __init__(self, ai_mode: bool = False, vs_computer: bool = True, dev_mode: bool = True) -> None:
@@ -40,7 +41,7 @@ class World():
         self.fade_color = 20
         self.fade_inversion = 230
         
-        self.img1 = pygame.image.load(f"{base_dir}/asset/img/bread_boy.png")
+        self.img1 = pygame.image.load(f"{base_dir}/asset/img/player.png")
         self.img2 = pygame.image.load(f"{base_dir}/asset/img/enemy0.png")
         self.img1 = pygame.transform.scale(self.img1, (300, 300))
         self.img2 = pygame.transform.scale(self.img2, (300, 300))
