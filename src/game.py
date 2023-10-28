@@ -4,27 +4,7 @@ subprocess.Popen('PAUSE', shell=True)
 # import argparse
 
 from src import world
-from src import utils
 
-# argparser = argparse.ArgumentParser()
-# argparser.add_argument("--ai", required=False, default=0)
-# argparser.add_argument("--cpu", required=False, default=1)
-
-# args = argparser.parse_args()
-# ai_mode = str(args.ai)
-# cpu_mode = str(args.cpu)
-# if ai_mode == "1":
-#     ai_mode = True
-# else:
-#     ai_mode = False
-# if cpu_mode == "1":
-#     cpu_mode = True
-# else:
-#     cpu_mode = False
-
-waza_loader = utils.WazaLoader("asset/enemy0.csv")
-world = world.World(False, True, False)
-world.waza_loader = waza_loader
-
+world = world.World(True, True)
 while world.running:
     world.process()
