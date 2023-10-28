@@ -7,11 +7,8 @@ import pandas as pd
 import pygame_gui
 from pygame_textinput.textinput import TextInput
 
-from utils import render_text_center, render_text_middle, WazaLoader
-from ai import ai_response
-from component import Player
-
-base_dir = os.environ.get("BASE_DIR")
+from src.utils import render_text_center, render_text_middle, WazaLoader, resource_path
+from src.component import Player, Enemy
 
 """
 
@@ -54,7 +51,7 @@ def render_text(text, pos, screen, size=24, bold=True):
     screen.blit(title, pos)
 
 class World():
-    def __init__(self, ai_mode: bool = False, vs_computer: bool = True) -> None:
+    def __init__(self, vs_computer: bool = True, dev_mode: bool = True) -> None:
         self.SCREEN_SIZE = [960, 640]
         self.TITLE = "コマンド式格闘ゲーム"
         self.scene = "start"
@@ -64,7 +61,6 @@ class World():
         self.vs_computer = vs_computer
         self.clock = pygame.time.Clock()
         pygame.init()
-        self.ai_mode = ai_mode
         self.screen = pygame.display.set_mode(self.SCREEN_SIZE, pygame.RESIZABLE)
         pygame.display.set_caption(self.TITLE)
         
@@ -80,12 +76,17 @@ class World():
         self.fade_color = 20
         self.fade_inversion = 230
         
+<<<<<<< HEAD:world.py
         self.img1 = pygame.image.load(f"{base_dir}/asset/img/bluebird_freeze.png")
         self.img2 = pygame.image.load(f"{base_dir}/asset/img/bluebird_enjou.png")
+=======
+        self.img1 = pygame.image.load(resource_path("bread_boy.png"))
+        self.img2 = pygame.image.load(resource_path("enemy0.png"))
+>>>>>>> origin/release_20231028_teacher:src/world.py
         self.img1 = pygame.transform.scale(self.img1, (300, 300))
         self.img2 = pygame.transform.scale(self.img2, (300, 300))
         
-        self.img_loser_mark = pygame.image.load(f"{base_dir}/asset/img/dead.png").convert()
+        self.img_loser_mark = pygame.image.load(resource_path("dead.png")).convert()
         self.img_loser_mark = pygame.transform.scale(self.img_loser_mark, (300, 300))
         self.img_loser_mark.set_colorkey((255,255,255))
         
@@ -100,21 +101,31 @@ class World():
         self.channel1.set_volume(0.2)
         self.channel2.set_volume(0.5)
         
+<<<<<<< HEAD:world.py
         self.bgm_fight = pygame.mixer.Sound(f"{base_dir}/asset/sound/maou_bgm_8bit29.mp3")
         self.sound_title_call = pygame.mixer.Sound(f"{base_dir}/asset/sound/maou_bgm_8bit29.mp3")
         self.es_attack_normal = pygame.mixer.Sound(f"{base_dir}/asset/sound/maou_se_battle14.mp3")
         self.es_attack_heavy = pygame.mixer.Sound(f"{base_dir}/asset/sound/maou_se_battle06.mp3")
         self.es_attack_missed = pygame.mixer.Sound(f"{base_dir}/asset/sound/maou_se_8bit26.mp3")
+=======
+        self.bgm_fight = pygame.mixer.Sound(resource_path("bgm.mp3"))
+        self.sound_title_call = pygame.mixer.Sound(resource_path("bgm.mp3"))
+        self.es_attack_normal = pygame.mixer.Sound(resource_path("se_battle14.mp3"))
+        self.es_attack_heavy = pygame.mixer.Sound(resource_path("se_battle06.mp3"))
+        self.es_attack_missed = pygame.mixer.Sound(resource_path("se_8bit26.mp3"))
+>>>>>>> origin/release_20231028_teacher:src/world.py
         
         self.channel2.play(self.sound_title_call, loops=0)
         
-        self.input_box_player_name = TextInput(pygame.font.SysFont("yumincho", 30), self.font_color)
+        self.input_box_player_name = TextInput(pygame.font.SysFont("Meiryo", 30), self.font_color)
         
         self.elapsed_time = 0.0
         self.waza_loader: WazaLoader
         self.responses = ["", ""]
         
         self.players = [self.player_1, self.player_2]
+        self.next_enemy_level = 0
+        self.dev_mode = dev_mode
     
     def process(self): # ゲームの状態に応じて実行する関数を分ける
         self.time_delta = self.clock.tick(self.FPS)/1000.0
@@ -122,7 +133,7 @@ class World():
         if self.scene == "sentaku":
             self.sentaku()
         elif self.scene == "kekka":
-            self.kekka(self.ai_mode)
+            self.kekka()
         elif self.scene == "start":
             self.show_start_screen()
         elif self.scene == "katimake":
@@ -133,6 +144,9 @@ class World():
             self.input_name(self.player_2)
         elif self.scene == "321go":
             self.go321()
+        elif self.scene == "update_enemy":
+            self.update_enemy()
+        
         self._update_screen()
         self._control_sound()
         self.scene_timer()
@@ -221,7 +235,7 @@ class World():
         self._handle_event(self.scene)
 
     
-    def kekka(self, ai_mode: bool = False):
+    def kekka(self):
         
         self._render_status("kekka:before")
         
@@ -239,26 +253,7 @@ class World():
                 player.hp -= player.damage_get
                 player.hp += player.heal
             
-            if ai_mode == True:
-                render_text_center("AI思考中", 32, self.screen, self.font_color)
-                self._update_screen()
-                data = [["Status Name", "Description"], 
-                        ["player_1_id", f"{self.player_1.id}"], 
-                        ["player_2_id", f"{self.player_2.id}"], 
-                        ["プレイヤー1_名前", f"{self.player_1.name}"], 
-                        ["プレイヤー2_名前", f"{self.player_2.name}"], 
-                        ["技を受ける前のプレイヤー1のHP", f"{self.player_1.hp}"], 
-                        ["技を受ける前のプレイヤー2のHP", f"{self.player_2.hp}"], 
-                        ["プレイヤー1の出した技", f"{self.player_1.waza_desc}"], 
-                        ["プレイヤー2の出した技", f"{self.player_2.waza_desc}"], 
-                        ["プレイヤー1の出した技の結果", self.player_1.waza_seikou], 
-                        ["プレイヤー2の出した技の結果", self.player_2.waza_seikou]]
-                
-                df = pd.DataFrame(data[1:], index=None, columns=data[0])
-                self.responses = ai_response.get_script(df, max_retries=2, temperature=0.8)
-                self.elapsed_time = 0.0
-            else:
-                pass
+            # AIモードで実行していたセリフ生成用のコードを削除した
             
             if self.player_2.waza_seikou == "成功" and self.player_2.waza != 2:
                 self.channel2.play(self.es_attack_normal)
@@ -267,7 +262,7 @@ class World():
             else:
                 self.channel2.play(self.es_attack_missed)
         
-        self._render_status("kekka", ai_mode)
+        self._render_status("kekka")
         
         if self.elapsed_time >= 2 and self._player_1_attack_was_displayed == False:
             if self.player_1.waza_seikou == "成功" and self.player_1.waza != 2:
@@ -293,11 +288,26 @@ class World():
         
         self.screen.blit(self.img1, [60, 320])
         self.screen.blit(self.img2, [600, 320])
-        self._render_status(self.scene, self.ai_mode)
+        self._render_status(self.scene)
         
         self._get_event()
         self._handle_event(self.scene)
+    
+    def update_enemy(self):
+        """これまでに倒した敵の情報から、次に倒す敵を作成して新しいバトルを開始するメソッド
+        """
+        self._get_event()
+        self._handle_event()
         
+        self.next_enemy = self.get_enemy_by_level(self.next_enemy_level)
+        self.player_2 = self.next_enemy
+        self.next_enemy = None        
+        self.next_enemy_level += 1
+        
+        self.players[1] = self.player_2
+
+        self.scene = "sentaku"
+    
     def _get_event(self):
         if len(self.current_events) > 0:
             self.prev_events = self.current_events
@@ -327,7 +337,11 @@ class World():
                 player.waza_desc = waza["desc"]
                 player.yuuri =  waza["yuuri"]
                 player.waza_id = waza["id"]
+<<<<<<< HEAD:world.py
                 player.wasa_kind = waza["kind"]
+=======
+                player.waza_kind = waza["kind"]
+>>>>>>> origin/release_20231028_teacher:src/world.py
                 player.guard = waza["guard"]
                 if random.random() < threshold:
                     player.heal = waza["heal"]
@@ -355,10 +369,14 @@ class World():
         self.player_2.damage_get = self.player_1.damage_give
         
         for player in self.players:
+<<<<<<< HEAD:world.py
             if player.wasa_kind == "guard":
+=======
+            if player.waza_kind == "guard":
+>>>>>>> origin/release_20231028_teacher:src/world.py
                 player.damage_get *= player.guard
     
-    def _render_status(self, scene_name: str, ai_mode: bool = False):
+    def _render_status(self, scene_name: str):
         render_text_middle(f"{self.player_1.name}", [200,30], 20, self.screen)
         render_text_middle(f"HP: {self.player_1.hp}", [200,60], 20, self.screen)
         render_text_middle(f"{self.player_2.name}", [740,30], 20, self.screen)
@@ -380,15 +398,11 @@ class World():
                 render_text_middle(f"{self.player_1.name}は「{self.waza_loader.load_waza(self.player_1.id, self.player_1.waza)['wazamei']}」を繰り出した！ {self.player_1.waza_seikou}", [480, 200], 20, self.screen, self.font_color)
                 render_text_middle(f"- {self.player_2.damage_get}", [840, 56], 26, self.screen, [255,0,0], bold=True)
                 render_text_middle(f"+ {self.player_2.heal}", [840, 24], 26, self.screen, [0,0,255], bold=True)
-
-                if ai_mode == True:
-                    render_text_middle(f"{self.responses[0]}", [480, 230], 16, self.screen, bold=False)
+                
             if self.elapsed_time >= 2:
                 render_text_middle(f"{self.player_2.name}は「{self.waza_loader.load_waza(self.player_2.id, self.player_2.waza)['wazamei']}」を繰り出した！ {self.player_2.waza_seikou}", [480, 270], 20, self.screen, self.font_color)
                 render_text_middle(f"- {self.player_1.damage_get}", [300, 56], 26, self.screen, [255,0,0], bold=True)
                 render_text_middle(f"+ {self.player_1.heal}", [300, 24], 26, self.screen, [0,0,255], bold=True)
-                if ai_mode == True:
-                    render_text_middle(f"{self.responses[1]}", [480, 300], 16, self.screen, bold=False)
             
         elif scene_name == "katimake":
             self._render_waza(self.player_1.id, pos=[100, 100])
@@ -410,17 +424,12 @@ class World():
             elif self.player_2.hp <= 0:
                 text_result = f'{self.player_1.name}の勝ち'
                 self.screen.blit(self.img_loser_mark, [600, 320])
+                self.update_enemy()
                 
             if self.elapsed_time > 1:
                 render_text_middle(text_result, [480, 20], 30, self.screen)
                 render_text_middle("Escキーでスタート画面に戻る", [480, 50], 20, self.screen, bold=True)
-            
-            if ai_mode == True:
-                render_text_middle(f"{self.responses[0]}", [480, 230], 16, self.screen, bold=False)
-                render_text_middle(f"{self.responses[1]}", [480, 300], 16, self.screen, bold=False)
-            else:
-                pass
-    
+                
     def _handle_event(self, scene_name: str = None, player_on_focus: Player = None):
         """### 各フレームで１回だけ呼ばれイベントを処理する。
         
@@ -482,6 +491,8 @@ class World():
                 elif event.key == K_u and self.vs_computer == False:
                     if scene_name == "sentaku":
                         self.player_2.waza = 3
+                elif event.key == K_n and self.dev_mode == True:
+                    self.update_enemy()
                 
             elif event.type == pygame.USEREVENT:
                 if scene_name.__contains__("input_name"):
@@ -533,7 +544,7 @@ class World():
                                 manager=self.manager)
             self.next_turn_button.disable()
             self.end_choice_button.enable()
-            self.scene = "sentaku"
+            self.scene = "update_enemy"
             
     
     def _render_waza(self, player_id: int, pos: list):
@@ -552,10 +563,20 @@ class World():
             self.elapsed_time = 0
         self.elapsed_time += self.time_delta
         print(self.elapsed_time)
+        
+    def get_enemy_by_level(self, level: int) -> Enemy:
+        self.waza_loader = WazaLoader(resource_path(f"stage{level}.csv"))
+        self.img2 = pygame.image.load(resource_path(f"enemy{level}.png"))
+        self.img2 = pygame.transform.scale(self.img2, (300, 300))
+        enemy = Enemy(100 + 10*level, 2, name = f"ボス{level}", level = level)
+        # for enemy in self.enemies:
+        #     if enemy.level == level:
+        #         print(f"Next enemy: {enemy}")
+        #         return enemy
+        return enemy
+    
 
 if __name__ == "__main__":
-    world = World(ai_mode=True, vs_computer=True)
-    waza_loader = WazaLoader("asset/test/waza_character.csv")
-    world.waza_loader = waza_loader
+    world = World(vs_computer=True)
     while True:
         world.process()

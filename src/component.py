@@ -12,3 +12,7 @@ class Player:
     waza_seikou: str = ""
     yuuri: str = None
     waza_id = None
+    
+@dataclass
+class Enemy(Player):
+    level: int = None
