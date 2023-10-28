@@ -10,50 +10,10 @@ from pygame_textinput.textinput import TextInput
 from src.utils import render_text_center, render_text_middle, WazaLoader, resource_path
 from src.component import Player, Enemy
 
-"""
-
-スタート画面で「スペースキーでスタート」と表示し、
-透明度をなめらかに上げ下げを繰り返す。
-スペースキーを押した後に3,2,1,GOがでて、それが出終わったらスタート
-
-1PはDキーでパンチ(ダメージ40)
-　　Aキーでガード(ダメージ60%軽減)
-　　Sキーでキック(ダメージ50)
-　　Zキーでしゃがむ(パンチ攻撃を避けられる)
-　　Eキーで強力パンチ(20%の確率で出せ、ダメージは80)
-　　TABキーで何をするか決定する
-　　
-2Pは＋キーでパンチ(ダメージ40)
-　　」キーでガード(ダメージ60%軽減)
-　　「キーでキック(ダメージ50)
-　　＿キーでしゃがむ(パンチ攻撃を避けられる)
-　　Pキーで強力パンチ(20%の確率で出せ、ダメージは80)
-　　Enter↩キーで何をするか決定する
-
-これらを2つまで組み合わせてそれぞれ攻撃ができる。
-2つ目の動作は1Pは1キー、2Pは｜(BackSpceの隣)を押してからか、何も押さずにいてから決定すれば何もしないという動作をすることができる。
-両者のHPは750に最初にセットする。
-HPを表示する。
-HPがダメージによって減った時に表示されている文字を3回揺らす。
-1Pと2Pは1つ目の攻撃と2つ目の攻撃を順番に決められる。
-自分と相手が選び終わったら(選び終わったかどうかを表示する)
-同時にそのターンに決めた行動をする。(この時に決めた技名を表示する)
-戦っている時にBGMを流す。
-HPが先に0以下になったプレイヤーが負けになり、どっちが勝ちか文字で表示する。(1Pなら「1Pの勝利！」と表示する)
-スタート画面に戻る
-
-
-"""
-
-def render_text(text, pos, screen, size=24, bold=True):
-    font = pygame.font.SysFont("MS UI Gothic", size, bold)
-    title = font.render(text, True, (255,255,255))
-    screen.blit(title, pos)
-
 class World():
     def __init__(self, vs_computer: bool = True, dev_mode: bool = True) -> None:
         self.SCREEN_SIZE = [960, 640]
-        self.TITLE = "コマンド式格闘ゲーム"
+        self.TITLE = "言うほどしょぼくない格ゲー"
         self.scene = "start"
         self.scene_prev = "launch"
         self.running = True
@@ -76,13 +36,8 @@ class World():
         self.fade_color = 20
         self.fade_inversion = 230
         
-<<<<<<< HEAD:world.py
-        self.img1 = pygame.image.load(f"{base_dir}/asset/img/bluebird_freeze.png")
-        self.img2 = pygame.image.load(f"{base_dir}/asset/img/bluebird_enjou.png")
-=======
-        self.img1 = pygame.image.load(resource_path("bread_boy.png"))
+        self.img1 = pygame.image.load(resource_path("player.png"))
         self.img2 = pygame.image.load(resource_path("enemy0.png"))
->>>>>>> origin/release_20231028_teacher:src/world.py
         self.img1 = pygame.transform.scale(self.img1, (300, 300))
         self.img2 = pygame.transform.scale(self.img2, (300, 300))
         
@@ -101,19 +56,11 @@ class World():
         self.channel1.set_volume(0.2)
         self.channel2.set_volume(0.5)
         
-<<<<<<< HEAD:world.py
-        self.bgm_fight = pygame.mixer.Sound(f"{base_dir}/asset/sound/maou_bgm_8bit29.mp3")
-        self.sound_title_call = pygame.mixer.Sound(f"{base_dir}/asset/sound/maou_bgm_8bit29.mp3")
-        self.es_attack_normal = pygame.mixer.Sound(f"{base_dir}/asset/sound/maou_se_battle14.mp3")
-        self.es_attack_heavy = pygame.mixer.Sound(f"{base_dir}/asset/sound/maou_se_battle06.mp3")
-        self.es_attack_missed = pygame.mixer.Sound(f"{base_dir}/asset/sound/maou_se_8bit26.mp3")
-=======
         self.bgm_fight = pygame.mixer.Sound(resource_path("bgm.mp3"))
         self.sound_title_call = pygame.mixer.Sound(resource_path("bgm.mp3"))
         self.es_attack_normal = pygame.mixer.Sound(resource_path("se_battle14.mp3"))
         self.es_attack_heavy = pygame.mixer.Sound(resource_path("se_battle06.mp3"))
         self.es_attack_missed = pygame.mixer.Sound(resource_path("se_8bit26.mp3"))
->>>>>>> origin/release_20231028_teacher:src/world.py
         
         self.channel2.play(self.sound_title_call, loops=0)
         
@@ -337,11 +284,7 @@ class World():
                 player.waza_desc = waza["desc"]
                 player.yuuri =  waza["yuuri"]
                 player.waza_id = waza["id"]
-<<<<<<< HEAD:world.py
-                player.wasa_kind = waza["kind"]
-=======
                 player.waza_kind = waza["kind"]
->>>>>>> origin/release_20231028_teacher:src/world.py
                 player.guard = waza["guard"]
                 if random.random() < threshold:
                     player.heal = waza["heal"]
@@ -363,17 +306,11 @@ class World():
                 if player.yuuri == teki.waza_id:
                     teki.damage_give *= 0.5
                     
-                    
-                    
         self.player_1.damage_get = self.player_2.damage_give
         self.player_2.damage_get = self.player_1.damage_give
         
         for player in self.players:
-<<<<<<< HEAD:world.py
-            if player.wasa_kind == "guard":
-=======
             if player.waza_kind == "guard":
->>>>>>> origin/release_20231028_teacher:src/world.py
                 player.damage_get *= player.guard
     
     def _render_status(self, scene_name: str):
