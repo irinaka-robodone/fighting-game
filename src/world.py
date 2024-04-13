@@ -7,8 +7,11 @@ import pandas as pd
 import pygame_gui
 from pygame_textinput.textinput import TextInput
 
-from src.utils import render_text_center, render_text_middle, WazaLoader, resource_path
-from src.component import Player, Enemy
+from utils import render_text_center, render_text_middle, WazaLoader, resource_path
+from component import Player, Enemy
+
+# 実行中のPythonスクリプトの階層に移動
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 class World():
     def __init__(self, vs_computer: bool = True, dev_mode: bool = True) -> None:

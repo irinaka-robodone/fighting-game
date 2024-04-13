@@ -32,14 +32,8 @@ class WazaLoader():
     def waza_df(self) -> pd.DataFrame:
         return self.__waza_df 
 
-# def scene_switcher(scene_from: str = "start"):
-#     import os
-#     base_dir = os.environ.get("BASE_DIR")
-#     scene_change_list = pd.read_csv(f"{base_dir}/scene_change_list.csv", sep=",", encoding="utf-8", header=0)
-    
-#     print(scene_change_list)
-
 def resource_path(relative_path):
+    print(os.getcwd())
     if hasattr(sys, '_MEIPASS'):
         return os.path.join(sys._MEIPASS, relative_path)
-    return os.path.join(os.path.abspath("."), relative_path)
+    return os.path.join(os.path.abspath("asset/"), relative_path)

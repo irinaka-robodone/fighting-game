@@ -3,8 +3,8 @@ subprocess.Popen('PAUSE', shell=True)
 
 # import argparse
 
-from src import world
+import world
 
-world = world.World(True, True)
+world = world.World(True, False)
 while world.running:
     world.process()
